@@ -11,7 +11,7 @@ def get_living_neighbors(i, j, generation):
                 living_neighbors += 1
     return living_neighbors
 
-def get_next_generation(generation):
+def get_next_generation(generation, age_of_generation):
     """
     compute the next generation
     """
@@ -23,12 +23,21 @@ def get_next_generation(generation):
                 if living_neighbors == 3:
                     updates.append((i, j))
             else:
-                if living_neighbors < 2 or living_neighbors > 3:
+                if living_neighbors < 2:
+                    updates.append((i, j))
+                if living_neighbors > 3 and age_of_generation[i][j] == 2:
                     updates.append((i, j))
 
     for i, j in updates:
         generation[i][j] = 0 if generation[i][j] == 1 else 1
-    return generation
+
+    for i in range(len(generation)):
+        for j in range(len(generation[0])):
+            if generation[i][j] == 1:
+                age_of_generation[i][j] += 1
+            else:
+                age_of_generation[i][j] = 0
+    return generation, age_of_generation
 
 def input_generation():
     board = []
@@ -40,9 +49,11 @@ def input_generation():
             row = max(row, i)
             col = max(col, j)
     generation =[[0 for j in range(col+1)] for i in range(row+1)]
+    age_of_generation=[[0 for j in range(col+1)] for i in range(row+1)]
     for i, j in board:
         generation[i][j] = 1
-    return generation
+        age_of_generation[i][j] = 1
+    return generation, age_of_generation
 
 def output_generation(new_generation):
     board = []
@@ -53,10 +64,24 @@ def output_generation(new_generation):
     with open('output.txt','w') as fobj:
         for i, j in board:
             fobj.write(str(i) + ',' + str(j) + '\n')
-    
+
+def print_generation(generation):
+    for i in range(len(generation)):
+        print(generation[i])
+
 def main():
-    generation = input_generation()
-    new_generation = get_next_generation(generation)
+    generation, age_of_generation = input_generation()
+    print("Seed:")
+    print_generation(generation)
+    new_generation, age_of_generation = get_next_generation(generation, age_of_generation)
+    print("First Generation:")
+    print_generation(new_generation)
+    new_generation, age_of_generation = get_next_generation(new_generation, age_of_generation)
+    print("Second Generation:")
+    print_generation(new_generation)
+    new_generation, age_of_generation = get_next_generation(new_generation, age_of_generation)
+    print("Third Generation:")
+    print_generation(new_generation)
     output_generation(new_generation)
 
 if __name__ == '__main__':
